@@ -1,0 +1,143 @@
+// SPDX-License-Identifier: EUPL-1.2
+
+import com.android.build.api.variant.LibraryAndroidComponentsExtension
+import com.android.build.gradle.LibraryExtension
+import com.google.android.libraries.mapsplatform.secrets_gradle_plugin.SecretsPluginExtension
+import org.gradle.api.Plugin
+import org.gradle.api.Project
+import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.create
+import org.gradle.kotlin.dsl.dependencies
+import project.convention.logic.AppFlavor
+import project.convention.logic.addConfigField
+import project.convention.logic.config.LibraryModule
+import project.convention.logic.config.LibraryPluginConfig
+import project.convention.logic.configureFlavors
+import project.convention.logic.configureKotlinAndroid
+import project.convention.logic.libs
+
+class AndroidLibraryConventionPlugin : Plugin<Project> {
+    override fun apply(target: Project) {
+
+        with(target) {
+            val config =
+                extensions.create<LibraryPluginConfig>("moduleConfig", LibraryModule.Unspecified)
+
+            val walletScheme = "nobid.lv"
+            val walletHost = "*"
+
+            val eudiOpenId4VpScheme = "eudi-openid4vp"
+            val eudiOpenid4VpHost = "*"
+
+            val mdocOpenId4VpScheme = "mdoc-openid4vp"
+            val mdocOpenid4VpHost = "*"
+
+            val openId4VpScheme = "openid4vp"
+            val openid4VpHost = "*"
+
+            val credentialOfferScheme = "openid-credential-offer"
+            val credentialOfferHost = "*"
+
+            val openId4VciAuthorizationScheme = "eu.europa.ec.euidi"
+            val openId4VciAuthorizationHost = "authorization"
+
+
+            with(pluginManager) {
+                apply("com.android.library")
+                apply("project.android.library.kover")
+                apply("project.android.lint")
+                apply("project.android.koin")
+                apply("org.jetbrains.kotlin.android")
+                apply("kotlinx-serialization")
+                apply("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+            }
+
+            extensions.configure<LibraryExtension> {
+                configureKotlinAndroid(this)
+                with(defaultConfig) {
+
+                    testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+                    targetSdk = 34
+
+                    addConfigField("DEEPLINK", "$walletScheme://")
+                    addConfigField("EUDI_OPENID4VP_SCHEME", eudiOpenId4VpScheme)
+                    addConfigField("MDOC_OPENID4VP_SCHEME", mdocOpenId4VpScheme)
+                    addConfigField("OPENID4VP_SCHEME", openId4VpScheme)
+                    addConfigField("CREDENTIAL_OFFER_SCHEME", credentialOfferScheme)
+                    addConfigField("ISSUE_AUTHORIZATION_SCHEME", openId4VciAuthorizationScheme)
+                    addConfigField("ISSUE_AUTHORIZATION_HOST", openId4VciAuthorizationHost)
+                    addConfigField(
+                        "ISSUE_AUTHORIZATION_DEEPLINK",
+                        "$openId4VciAuthorizationScheme://$openId4VciAuthorizationHost"
+                    )
+                    addConfigField("SIGN_FILE_SHARE_SCHEME", "fileshare")
+                    addConfigField("FILE_SHARE_HOST", "*")
+
+                    addConfigField("EPARAKSTS_CLIENT_ID", "edim.wallet.instance")
+                    addConfigField("EPARAKSTS_REDIRECT_URI", "$walletScheme://auth-done")
+                    addConfigField("EPARAKSTS_ACR_VALUES", "eparaksts:mobileid")
+
+                    // Manifest placeholders for Wallet deepLink
+                    manifestPlaceholders["deepLinkScheme"] = walletScheme
+                    manifestPlaceholders["deepLinkHost"] = walletHost
+
+                    // Manifest placeholders used for OpenId4VP
+                    manifestPlaceholders["eudiOpenid4vpScheme"] = eudiOpenId4VpScheme
+                    manifestPlaceholders["eudiOpenid4vpHost"] = eudiOpenid4VpHost
+                    manifestPlaceholders["mdocOpenid4vpScheme"] = mdocOpenId4VpScheme
+                    manifestPlaceholders["mdocOpenid4vpHost"] = mdocOpenid4VpHost
+                    manifestPlaceholders["openid4vpScheme"] = openId4VpScheme
+                    manifestPlaceholders["openid4vpHost"] = openid4VpHost
+
+                    // Manifest placeholders used for OpenId4VCI
+                    manifestPlaceholders["credentialOfferHost"] = credentialOfferHost
+                    manifestPlaceholders["credentialOfferScheme"] = credentialOfferScheme
+
+                    // Manifest placeholders used for OpenId4VCI Authorization
+                    manifestPlaceholders["openId4VciAuthorizationScheme"] =
+                        openId4VciAuthorizationScheme
+                    manifestPlaceholders["openId4VciAuthorizationHost"] =
+                        openId4VciAuthorizationHost
+                }
+
+                configureFlavors(this) { flavor ->
+                    when (flavor) {
+                        AppFlavor.ZZDev,
+                        AppFlavor.ZZWeb,
+                        AppFlavor.ZZDemo -> {
+                            addConfigField("EIDAS_AUTH_URL", "https://edim-dev.zzdats.lv/idauth/authorize")
+                        }
+                        AppFlavor.Demo -> {
+                            addConfigField("EIDAS_AUTH_URL", "https://edim-test.eparaksts.lv/idauth/authorize")
+                        }
+                        AppFlavor.Prod -> {
+                            addConfigField("EIDAS_AUTH_URL", "https://edim-test.eparaksts.lv/idauth/authorize")
+                        }
+                    }
+                }
+
+                testOptions {
+                    unitTests {
+                        isIncludeAndroidResources = true
+                        isReturnDefaultValues = true
+                    }
+                }
+            }
+            dependencies {
+                add("implementation", libs.findLibrary("kotlinx-coroutines-android").get())
+                add("implementation", libs.findLibrary("kotlinx-coroutines-guava").get())
+
+                add("testImplementation", "junit:junit:4.13.2")
+                add("androidTestImplementation", "androidx.test.ext:junit:1.1.5")
+            }
+            afterEvaluate {
+                if (!config.module.isLogicModule && !config.module.isFeatureCommon) {
+                    dependencies {
+                        add("implementation", project(LibraryModule.CommonFeature.path))
+                    }
+                }
+            }
+        }
+    }
+}

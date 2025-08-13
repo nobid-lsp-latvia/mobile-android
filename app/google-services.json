@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "647294553288",
+    "project_id": "edim-6b66b",
+    "storage_bucket": "edim-6b66b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:647294553288:android:376dceebb0c3bd59ec29fd",
+        "android_client_info": {
+          "package_name": "lv.lvrtc.edim"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwSWpQ5e1GcMx2v_N_O7xfEJFkneaiVWE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:647294553288:android:4ebbccfb5d55415aec29fd",
+        "android_client_info": {
+          "package_name": "lv.lvrtc.edim.zz"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwSWpQ5e1GcMx2v_N_O7xfEJFkneaiVWE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">lx-dev.zzdats.lv</domain>
+        <domain includeSubdomains="true">appassets.androidplatform.net</domain>
+        <domain includeSubdomains="true">test-credentials.seb.lv</domain>
+
+        <trust-anchors>
+            <certificates src="@raw/cert"/>
+            <certificates src="system"/>
+        </trust-anchors>
+    </domain-config>
+</network-security-config>
